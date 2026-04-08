@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/* ✅ 1. 스크롤바 투명 & 슬림화 커스텀 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; /* 트랙(배경)을 완전히 투명하게 */
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2); /* 스크롤바 색상을 반투명 하얀색으로 */
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4); /* 마우스 올렸을 때 조금 더 밝게 */
+}
+
+/* ✅ 2. 메시지 등장 (Fade-in-up) 애니메이션 정의 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
