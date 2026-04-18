@@ -6,8 +6,8 @@ interface HeaderProps {
   setIsBentoOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isExpanded: boolean;
   toggleWindowSize: () => Promise<void>;
-  activeTab: "chat" | "plugin";
-  setActiveTab: React.Dispatch<React.SetStateAction<"chat" | "plugin">>;
+  activeTab: "chat" | "plugin" | "system";
+  setActiveTab: React.Dispatch<React.SetStateAction<"chat" | "plugin" | "system">>;
 }
 
 export function Header({ 
@@ -46,7 +46,7 @@ export function Header({
               <span className="text-2xl transition-transform group-hover:scale-110 drop-shadow-md">🧩</span>
               <p className="text-xs font-semibold text-white/90">모듈 설정</p>
             </div>
-            <div onClick={() => { setIsBentoOpen(false); alert("설정 기능은 준비 중입니다!"); }} className="bg-slate-700 border border-slate-600 rounded-xl p-3 flex flex-col items-center gap-2 cursor-pointer hover:bg-slate-600 transition-colors group text-center shadow-sm">
+            <div onClick={() => { setActiveTab("system"); setIsBentoOpen(false); }} className={`bg-slate-700 border rounded-xl p-3 flex flex-col items-center gap-2 cursor-pointer hover:bg-slate-600 transition-colors group text-center shadow-sm ${activeTab === "system" ? "border-blue-500 ring-1 ring-blue-500" : "border-slate-600"}`}>
               <span className="text-2xl transition-transform group-hover:scale-110 drop-shadow-md">⚙️</span>
               <p className="text-xs font-semibold text-white/90">시스템 설정</p>
             </div>

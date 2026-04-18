@@ -21,7 +21,7 @@ export type Message = {
 };
 
 interface UseAgentProps {
-  openai: OpenAI;
+  openai: OpenAI | null;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   installedPlugins: string[];
@@ -29,16 +29,18 @@ interface UseAgentProps {
   userHome: string;
   setSystemStatus: React.Dispatch<React.SetStateAction<string>>;
   indexingDepth: number;
+  tavilyKey: string;
 }
 
 export function useAgent({
-  openai, messages, setMessages, installedPlugins, fsWhitelist, userHome, setSystemStatus
+  openai, messages, setMessages, installedPlugins, fsWhitelist, userHome, setSystemStatus, tavilyKey
 }: UseAgentProps) {
   
   const [isProcessing, setIsProcessing] = useState(false);
 
   // [핵심 로직] 권한이 제한된 에이전트의 자율 주행 루프
   const runAgentLoop = async (agentName: string, systemPrompt: string, userPrompt: string, allowedToolNames: string[]) => {
+    if (!openai) throw new Error("OpenAI API 키가 설정되지 않았습니다.");
     const allowedTools = getAllowedTools(installedPlugins, allowedToolNames);
     let loopMessages: Message[] = [
       { role: "system", content: systemPrompt },
@@ -67,7 +69,7 @@ export function useAgent({
 
       if (msg.tool_calls && msg.tool_calls.length > 0) {
         for (const call of msg.tool_calls) {
-          const result = await executeToolCall(call);
+          const result = await executeToolCall(call, tavilyKey);
           loopMessages.push({ role: "tool", tool_call_id: call.id, name: call.function.name, content: result });
         }
       } else {
@@ -80,6 +82,10 @@ export function useAgent({
 
   // [메인 오케스트레이션 파이프라인]
   const sendMessage = async (userMsg: string) => {
+    if (!openai) {
+      setMessages(prev => [...prev, { role: "assistant", content: "🚨 시스템 설정(⚙️) 메뉴로 이동하여 OpenAI API Key를 먼저 등록해 주세요." } as Message]);
+      return;
+    }
     setIsProcessing(true);
     let currentMessages = [...messages];
     currentMessages.push({ role: "user", content: userMsg });

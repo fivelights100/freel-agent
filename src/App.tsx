@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import OpenAI from "openai";
 import "./App.css";
@@ -14,21 +14,26 @@ import { Header } from "./components/Header";
 import { ChatList } from "./components/ChatList";
 import { ChatInput } from "./components/ChatInput";
 import { Live2DView } from "./components/Live2DView";
-
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true, 
-});
+import { SystemSettingsView } from "./components/SystemSettingsView";
 
 function App() {
-  const { installedPlugins, setInstalledPlugins, fsWhitelist, setFsWhitelist, userHome } = useSettings();
+  const { 
+    installedPlugins, setInstalledPlugins, 
+    fsWhitelist, setFsWhitelist, 
+    userHome,
+    openaiKey, setOpenaiKey,
+    tavilyKey, setTavilyKey,
+    elevenlabsKey, setElevenlabsKey,
+    voiceId, setVoiceId
+  } = useSettings();
 
   const [indexingDepth, setIndexingDepth] = useState(3);
 
-  const [activeTab, setActiveTab] = useState<"chat" | "plugin">("chat");
+  const [activeTab, setActiveTab] = useState<"chat" | "plugin" | "system">("chat");
   const [isExpanded, setIsExpanded] = useState(false);
   const [isBentoOpen, setIsBentoOpen] = useState(false);
   const [isAttachmentOpen, setIsAttachmentOpen] = useState(false);
+  
 
   const [messages, setMessages] = useState<Message[]>([systemPrompt as Message, { role: "assistant", content: "안녕하세요! 사용자님의 데스크탑 제어 AI입니다. 무엇이든 요청해 주세요.\n\n절대로 개인정보를 입력하지 마세요!!" } as Message]);
   const [inputText, setInputText] = useState("");
@@ -39,8 +44,16 @@ function App() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { isRecording, startRecording, stopRecording } = useAudioRecorder({ openai, setInputText, setSystemStatus });
-  const { isProcessing, sendMessage } = useAgent({ openai, messages, setMessages, installedPlugins, fsWhitelist, userHome, setSystemStatus, indexingDepth });
+  const openai = useMemo(() => {
+    if (!openaiKey) return null;
+    return new OpenAI({ apiKey: openaiKey, dangerouslyAllowBrowser: true });
+  }, [openaiKey]);
+
+  const { isRecording, startRecording, stopRecording } = useAudioRecorder({openai, setInputText, setSystemStatus });
+  const { isProcessing, sendMessage } = useAgent({ 
+    openai, messages, setMessages, installedPlugins, fsWhitelist, userHome, setSystemStatus, indexingDepth, 
+    tavilyKey
+  });
 
   // 화면 스크롤 및 텍스트박스 높이 조절
   useEffect(() => { 
@@ -95,7 +108,6 @@ function App() {
       <main className="flex-1 overflow-hidden p-4 relative flex flex-col">
         {activeTab === "chat" ? (
           <div className="flex flex-col h-full gap-4">
-            
             <div className="flex items-center justify-between shrink-0">
               <div className="bg-blue-950/50 border border-blue-400/30 rounded-lg p-3 text-xs text-blue-200 flex items-center gap-2 transition-all">
                 {isProcessing ? <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" /> : <div className="w-4 h-4 rounded-full bg-blue-500/50" />}
@@ -135,7 +147,7 @@ function App() {
               isProcessing={isProcessing} handleSend={handleSend}
             />
           </div>
-        ) : (
+        ) : activeTab === "plugin" ? (
           <PluginView 
             installedPlugins={installedPlugins} 
             setInstalledPlugins={setInstalledPlugins} 
@@ -143,6 +155,14 @@ function App() {
             setFsWhitelist={setFsWhitelist}
             indexingDepth={indexingDepth}
             setIndexingDepth={setIndexingDepth}
+          />
+        ) : (
+          // 👈 시스템 탭일 경우
+          <SystemSettingsView 
+            openaiKey={openaiKey} setOpenaiKey={setOpenaiKey}
+            tavilyKey={tavilyKey} setTavilyKey={setTavilyKey}
+            elevenlabsKey={elevenlabsKey} setElevenlabsKey={setElevenlabsKey}
+            voiceId={voiceId} setVoiceId={setVoiceId}
           />
         )}
       </main>

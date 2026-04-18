@@ -14,12 +14,15 @@ export const getAllowedTools = (installedPlugins: string[], allowedToolNames: st
 };
 
 // 실제 도구(Tool)를 실행하는 로직
-export const executeToolCall = async (toolCall: any): Promise<string> => {
+export const executeToolCall = async (toolCall: any, tavilyKey: string): Promise<string> => {
   const name = toolCall.function.name;
   const args = JSON.parse(toolCall.function.arguments || "{}");
   try {
     if (name === "get_system_info") return await invoke<string>("get_system_info");
-    if (name === "web_search") return await invoke<string>("web_search", { query: args.query, apiKey: import.meta.env.VITE_TAVILY_API_KEY! });
+    if (name === "web_search") {
+      if (!tavilyKey) throw new Error("시스템 설정에서 Tavily API 키를 먼저 입력해주세요.");
+      return await invoke<string>("web_search", { query: args.query, apiKey: tavilyKey });
+    }
     if (name === "list_directory") return JSON.stringify(await invoke<string[]>("list_directory", { path: args.path }));
     if (name === "read_text_file") return await invoke<string>("read_text_file", { path: args.path });
     if (name === "write_text_file") return await invoke<string>("write_text_file", { path: args.path, content: args.content });

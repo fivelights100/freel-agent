@@ -2,12 +2,8 @@ import { useState } from "react";
 import { PLUGIN_REGISTRY } from "../config/plugins";
 
 export function PluginView({ 
-  installedPlugins, setInstalledPlugins,
   fsWhitelist, setFsWhitelist,
-  indexingBasePath = "", setIndexingBasePath,
   indexingDepth = 3, setIndexingDepth,
-  requiresApproval = true, 
-  setRequiresApproval
 }: { 
   installedPlugins: string[], setInstalledPlugins: React.Dispatch<React.SetStateAction<string[]>>,
   fsWhitelist: string[], setFsWhitelist: React.Dispatch<React.SetStateAction<string[]>>,
@@ -17,7 +13,6 @@ export function PluginView({
 }) {
   
   const [newPathInput, setNewPathInput] = useState("");
-  const [basePathError, setBasePathError] = useState("");
 
   const handleAddPath = () => {
     const trimmedPath = newPathInput.trim();
@@ -29,18 +24,6 @@ export function PluginView({
 
   const handleRemovePath = (targetPath: string) => {
     setFsWhitelist(fsWhitelist.filter(p => p !== targetPath));
-  };
-
-  const handleBasePathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    if (setIndexingBasePath) setIndexingBasePath(val);
-
-    const upperVal = val.trim().toUpperCase();
-    if (upperVal === "C:\\" || upperVal === "C:/") {
-      setBasePathError("C:\\ 최상단 경로는 지정할 수 없습니다.");
-    } else {
-      setBasePathError("");
-    }
   };
 
   return (
