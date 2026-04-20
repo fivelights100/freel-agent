@@ -24,8 +24,6 @@ export function useSettings() {
       try {
         const store = await load('freel_settings.json');
         
-        const savedModules = await store.get<string[]>("installedModules");
-        // if (savedModules) setInstalledModules(savedModules); // 이 줄을 잠시 지우거나 주석 처리
         setInstalledModules(["filesystem", "application", "system_info", "browser"]); // 무조건 4개 다 켜도록 강제 고정
 
         const savedWhitelist = await store.get<string[]>("fsWhitelist");

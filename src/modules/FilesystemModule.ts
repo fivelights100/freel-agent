@@ -1,6 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
 import { AgentModule } from "./types";
-import OpenAI from "openai";
 
 export const FilesystemModule: AgentModule = {
   id: "filesystem",
