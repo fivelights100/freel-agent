@@ -15,7 +15,7 @@ export function useSettings() {
 
   // 👇 새롭게 추가된 API 키 및 설정 상태
   const [openaiKey, setOpenaiKey] = useState<string>("");
-  const [tavilyKey, setTavilyKey] = useState<string>("");
+  const [serperKey, setSerperKey] = useState<string>("");
   const [elevenlabsKey, setElevenlabsKey] = useState<string>("");
   const [voiceId, setVoiceId] = useState<string>("");
 
@@ -34,7 +34,7 @@ export function useSettings() {
         if (savedOpenai) setOpenaiKey(savedOpenai);
 
         const savedTavily = await store.get<string>("tavilyKey");
-        if (savedTavily) setTavilyKey(savedTavily);
+        if (savedTavily) setSerperKey(savedTavily);
 
         const savedElevenlabs = await store.get<string>("elevenlabsKey");
         if (savedElevenlabs) setElevenlabsKey(savedElevenlabs);
@@ -64,7 +64,7 @@ export function useSettings() {
         
         // 👇 설정 저장하기
         await store.set("openaiKey", openaiKey);
-        await store.set("tavilyKey", tavilyKey);
+        await store.set("tavilyKey", serperKey);
         await store.set("elevenlabsKey", elevenlabsKey);
         await store.set("voiceId", voiceId);
         
@@ -74,7 +74,7 @@ export function useSettings() {
       }
     };
     saveSettings();
-  }, [installedModules, fsWhitelist, openaiKey, tavilyKey, elevenlabsKey, voiceId, isStoreLoaded]);
+  }, [installedModules, fsWhitelist, openaiKey, serperKey, elevenlabsKey, voiceId, isStoreLoaded]);
 
   return { 
     installedModules, setInstalledModules,
@@ -82,7 +82,7 @@ export function useSettings() {
     userHome,
     // 👇 반환 객체에 추가
     openaiKey, setOpenaiKey,
-    tavilyKey, setTavilyKey,
+    serperKey, setSerperKey,
     elevenlabsKey, setElevenlabsKey,
     voiceId, setVoiceId
   };

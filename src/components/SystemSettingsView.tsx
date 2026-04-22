@@ -2,12 +2,12 @@ import { useState } from "react";
 
 export function SystemSettingsView({
   openaiKey, setOpenaiKey,
-  tavilyKey, setTavilyKey,
+  serperKey, setSerperKey,
   elevenlabsKey, setElevenlabsKey,
   voiceId, setVoiceId
 }: {
   openaiKey: string, setOpenaiKey: (v: string) => void,
-  tavilyKey: string, setTavilyKey: (v: string) => void,
+  serperKey: string, setSerperKey: (v: string) => void,
   elevenlabsKey: string, setElevenlabsKey: (v: string) => void,
   voiceId: string, setVoiceId: (v: string) => void
 }) {
@@ -61,12 +61,12 @@ export function SystemSettingsView({
               </div>
 
               <div>
-                <label className="block text-white/70 mb-1.5 font-semibold">Tavily API Key (웹 검색)</label>
+                <label className="block text-white/70 mb-1.5 font-semibold">Serper API Key (웹 검색)</label>
                 <input
                   type="password"
-                  value={tavilyKey}
-                  onChange={(e) => setTavilyKey(e.target.value)}
-                  placeholder="tvly-..."
+                  value={serperKey}
+                  onChange={(e) => setSerperKey(e.target.value)}
+                  placeholder="Serper API Key 입력"
                   className="w-full bg-black/50 border border-white/20 rounded-md px-3 py-2 text-xs text-white outline-none focus:border-blue-400 transition-colors"
                 />
               </div>

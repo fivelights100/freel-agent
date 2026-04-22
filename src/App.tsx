@@ -22,7 +22,7 @@ function App() {
     fsWhitelist, setFsWhitelist, 
     userHome,
     openaiKey, setOpenaiKey,
-    tavilyKey, setTavilyKey,
+    serperKey, setSerperKey,
     elevenlabsKey, setElevenlabsKey,
     voiceId, setVoiceId
   } = useSettings();
@@ -52,7 +52,7 @@ function App() {
   const { isRecording, startRecording, stopRecording } = useAudioRecorder({openai, setInputText, setSystemStatus });
   const { isProcessing, sendMessage } = useAgent({
     openai, messages, setMessages, installedModules, fsWhitelist, userHome, setSystemStatus, indexingDepth,
-    tavilyKey
+    serperKey
   });
 
   // 화면 스크롤 및 텍스트박스 높이 조절
@@ -160,7 +160,7 @@ function App() {
           // 👈 시스템 탭일 경우
           <SystemSettingsView 
             openaiKey={openaiKey} setOpenaiKey={setOpenaiKey}
-            tavilyKey={tavilyKey} setTavilyKey={setTavilyKey}
+            serperKey={serperKey} setSerperKey={setSerperKey}
             elevenlabsKey={elevenlabsKey} setElevenlabsKey={setElevenlabsKey}
             voiceId={voiceId} setVoiceId={setVoiceId}
           />
