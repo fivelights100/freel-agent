@@ -20,6 +20,9 @@ function App() {
     scanBlacklistPaths, setScanBlacklistPaths
   } = useSettings();
 
+  // 💡 선택된 모델을 관리하는 상태 추가 (기본값 설정)
+  const [selectedModel, setSelectedModel] = useState<string>("gemma4:26b-a4b");
+
   const [activeTab, setActiveTab] = useState<"chat" | "2d" | "system">("chat");
   const [chatSubTab, setChatSubTab] = useState<"general" | "thought" | "debug">("general");
   const [isBentoOpen, setIsBentoOpen] = useState(false);
@@ -33,12 +36,20 @@ function App() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const openai = useMemo(() => {
-    if (!openaiKey) return null;
-    return new OpenAI({ apiKey: openaiKey, dangerouslyAllowBrowser: true });
-  }, [openaiKey]);
+    // 💡 Ollama(로컬) 주소로 고정
+    return new OpenAI({ 
+      baseURL: "http://localhost:11434/v1",
+      apiKey: "ollama", 
+      dangerouslyAllowBrowser: true 
+    });
+  }, []);
 
   const { isRecording, startRecording, stopRecording } = useAudioRecorder({ openai, setInputText });
-  const { isProcessing, sendMessage } = useAgent({ openai, messages, setMessages, serperKey, scanBlacklistNames, scanBlacklistPaths });
+  
+  // 💡 useAgent에 selectedModel 전달
+  const { isProcessing, sendMessage } = useAgent({ 
+    openai, messages, setMessages, serperKey, scanBlacklistNames, scanBlacklistPaths, selectedModel 
+  });
 
   const lastUserIndex = messages.map(m => m.role).lastIndexOf('user');
   const currentTaskMessages = lastUserIndex >= 0 ? messages.slice(lastUserIndex) : [];
@@ -61,7 +72,6 @@ function App() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* 헤더 부분: 넓이 확장 관련 프롭스 모두 제거됨 */}
       <Header 
         isBentoOpen={isBentoOpen} setIsBentoOpen={setIsBentoOpen} 
         activeTab={activeTab} setActiveTab={setActiveTab} 
@@ -155,7 +165,6 @@ function App() {
                         <span className="text-2xl opacity-50">💭</span>
                       </div>
                       <span>현재 진행 중인 작업의 도구 호출 내역이 없습니다.</span>
-                      <span className="text-xs opacity-60">복잡한 명령을 내리면 AI의 계획과 실행 과정이 이곳에 표시됩니다.</span>
                     </div>
                   )}
                   
@@ -165,12 +174,6 @@ function App() {
 
               {chatSubTab === "debug" && (
                 <div className="absolute inset-0 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4">
-                  
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-emerald-400">🔍 데이터 스트림 디버거</span>
-                    <span className="text-[10px] bg-white/10 px-2 py-1 rounded-md text-white/50">총 {currentTaskMessages.length}개 노드</span>
-                  </div>
-
                   {currentTaskMessages.map((msg, i) => {
                     let roleColor = "text-emerald-300";
                     let borderColor = "border-emerald-500/30";
@@ -178,25 +181,13 @@ function App() {
                     let roleLabel = "🤖 Assistant (일반 답변)";
 
                     if (msg.role === 'user') {
-                      roleColor = "text-blue-300";
-                      borderColor = "border-blue-500/30";
-                      bgColor = "bg-blue-950/20";
-                      roleLabel = "👤 User (사용자 입력)";
+                      roleColor = "text-blue-300"; borderColor = "border-blue-500/30"; bgColor = "bg-blue-950/20"; roleLabel = "👤 User (사용자 입력)";
                     } else if (msg.role === 'tool') {
-                      roleColor = "text-amber-300";
-                      borderColor = "border-amber-500/30";
-                      bgColor = "bg-amber-950/20";
-                      roleLabel = "⚙️ Tool Result (엔진 반환값)";
+                      roleColor = "text-amber-300"; borderColor = "border-amber-500/30"; bgColor = "bg-amber-950/20"; roleLabel = "⚙️ Tool Result (엔진 반환값)";
                     } else if (msg.role === 'system') {
-                      roleColor = "text-slate-300";
-                      borderColor = "border-slate-500/30";
-                      bgColor = "bg-slate-950/20";
-                      roleLabel = "⚙️ System (시스템 프롬프트)";
+                      roleColor = "text-slate-300"; borderColor = "border-slate-500/30"; bgColor = "bg-slate-950/20"; roleLabel = "⚙️ System (시스템 프롬프트)";
                     } else if (msg.tool_calls) {
-                      roleColor = "text-indigo-300";
-                      borderColor = "border-indigo-500/30";
-                      bgColor = "bg-indigo-950/20";
-                      roleLabel = "🧠 Tool Call (도구 호출 요청)";
+                      roleColor = "text-indigo-300"; borderColor = "border-indigo-500/30"; bgColor = "bg-indigo-950/20"; roleLabel = "🧠 Tool Call (도구 호출 요청)";
                     }
 
                     return (
@@ -206,9 +197,7 @@ function App() {
                           <span className="text-[10px] text-white/30 font-mono">[{i}]</span>
                         </div>
                         <div className="p-4 overflow-x-auto custom-scrollbar">
-                          <pre className={`text-[11px] ${roleColor} font-mono whitespace-pre-wrap break-all leading-relaxed`}>
-                            {JSON.stringify(msg, null, 2)}
-                          </pre>
+                          <pre className={`text-[11px] ${roleColor} font-mono whitespace-pre-wrap break-all leading-relaxed`}>{JSON.stringify(msg, null, 2)}</pre>
                         </div>
                       </div>
                     );
@@ -218,7 +207,6 @@ function App() {
               )}
             </div>
 
-            {/* 입력창 부분: 불필요한 프롭스 모두 제거됨 */}
             <ChatInput 
               isRecording={isRecording} startRecording={startRecording} stopRecording={stopRecording}
               textareaRef={textareaRef}
@@ -230,6 +218,7 @@ function App() {
           <Live2DView isProcessing={isProcessing} lastMessage={messages[messages.length - 1]} />
         ) : (
           <SystemSettingsView 
+            selectedModel={selectedModel} setSelectedModel={setSelectedModel}
             openaiKey={openaiKey} setOpenaiKey={setOpenaiKey}
             serperKey={serperKey} setSerperKey={setSerperKey}
             elevenlabsKey={elevenlabsKey} setElevenlabsKey={setElevenlabsKey}

@@ -47,6 +47,7 @@ export class ToolsExecutor {
       }, 180000);
 
       this.pendingTasks.set(taskId, (result) => {
+        
         clearTimeout(timeoutId);
         resolve(result);
       });

@@ -220,11 +220,12 @@ interface UseAgentProps {
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   serperKey?: string; 
+  selectedModel: string;
   scanBlacklistNames?: string;
   scanBlacklistPaths?: string;
 }
 
-export const useAgent = ({ openai, messages, setMessages, serperKey, scanBlacklistNames, scanBlacklistPaths }: UseAgentProps) => {
+export const useAgent = ({ openai, messages, setMessages, serperKey, selectedModel, scanBlacklistNames, scanBlacklistPaths }: UseAgentProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const executorRef = useRef<ToolsExecutor | null>(null);
 
@@ -262,12 +263,10 @@ export const useAgent = ({ openai, messages, setMessages, serperKey, scanBlackli
             const triggerPrompt = `[System Trigger] 사용자의 기억이 로드되었습니다. 인사와 함께 오늘 할만한 작업을 1~2문장으로 제안하세요. 질문은 하지 말고 자연스럽게 말을 건네세요.`;
             
             const response = await openai.chat.completions.create({
-              model: "gpt-4o-mini",
-              messages: [
-                systemPrompt,
-                { role: 'system', content: `사용자 기억 컨텍스트: ${memoryString}` },
-                { role: 'user', content: triggerPrompt }
-              ]
+              model: selectedModel,
+              messages: messages,
+              tools: AGENT_TOOLS,
+              tool_choice: "auto"
             });
 
             const greeting = response.choices[0].message.content;
@@ -307,9 +306,9 @@ export const useAgent = ({ openai, messages, setMessages, serperKey, scanBlackli
       while (loopCount < MAX_LOOPS && !isTaskComplete) {
         loopCount++;
         const response = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
+          model: selectedModel,
           messages: currentMessages,
-          tools: AGENT_TOOLS as any, // 분리해둔 상수를 사용
+          tools: AGENT_TOOLS,
           tool_choice: "auto"
         });
 

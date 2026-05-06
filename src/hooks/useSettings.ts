@@ -5,6 +5,7 @@ export const useSettings = () => {
   const [serperKey, setSerperKey] = useState(localStorage.getItem('serperKey') || '');
   const [elevenlabsKey, setElevenlabsKey] = useState(localStorage.getItem('elevenlabsKey') || '');
   const [voiceId, setVoiceId] = useState(localStorage.getItem('voiceId') || '');
+  const [selectedModel, setSelectedModel] = useState<string>("gemma4:26b-a4b");
   
   // 💡 폴더명 기준 블랙리스트
   const [scanBlacklistNames, setScanBlacklistNames] = useState(
@@ -30,6 +31,7 @@ export const useSettings = () => {
     serperKey, setSerperKey, 
     elevenlabsKey, setElevenlabsKey, 
     voiceId, setVoiceId,
+    selectedModel, setSelectedModel,
     scanBlacklistNames, setScanBlacklistNames,
     scanBlacklistPaths, setScanBlacklistPaths
   };
